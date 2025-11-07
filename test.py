@@ -80,7 +80,6 @@ def get_args_parser():
 
     parser.add_argument('--lr', type=float, default=4e-3, metavar='LR',
                         help='learning rate (default: 4e-3), with total batch size 4096')
-    # parser.add_argument('--layer_decay', type=float, default=1.0)
     parser.add_argument('--layer_decay', type=float, default=0.7)
     parser.add_argument('--min_lr', type=float, default=5e-5, metavar='LR',
                         help='lower lr bound for cyclic schedulers that hit 0 (1e-6)')
@@ -136,7 +135,7 @@ def get_args_parser():
     parser.add_argument('--model_prefix', default='', type=str)
 
     # Dataset parameters
-    parser.add_argument('--data_path', default='D:/dataset/HAM10000', type=str,
+    parser.add_argument('--data_path', default='', type=str,
                         help='dataset path')
     parser.add_argument('--eval_data_path', default=None, type=str,
                         help='dataset path for evaluation')
@@ -145,7 +144,7 @@ def get_args_parser():
     parser.add_argument('--imagenet_default_mean_and_std', type=str2bool, default=True)
     parser.add_argument('--data_set', default='HAM10000', choices=['CIFAR', 'IMNET', 'HAM10000', 'HAM10000', 'image_folder'],
                         type=str, help='ImageNet dataset path')
-    parser.add_argument('--output_dir', default='D:/acode2/myMambaNet-main/HAM10000',
+    parser.add_argument('--output_dir', default='',
                         help='path where to save, empty for no saving')
     parser.add_argument('--log_dir', default=None,
 
@@ -158,8 +157,6 @@ def get_args_parser():
 
     parser.add_argument('--resume', default='',
                         help='resume from checkpoint')
-    # parser.add_argument('--resume', default='https://dl.fbaipublicfiles.com/convnext/convnext_base_22k_1k_224.pth',
-    #                     help='resume from checkpoint')
     parser.add_argument('--auto_resume', type=str2bool, default=True)
     parser.add_argument('--save_ckpt', type=str2bool, default=True)
     parser.add_argument('--save_ckpt_freq', default=1, type=int)
@@ -259,7 +256,7 @@ def main(args):
     utils.init_distributed_mode(args)
     print(args)
     device = torch.device(args.device)
-    print(f"Using device: {device}")  # 输出当前使用的设备
+    print(f"Using device: {device}") 
 
     # fix the seed for reproducibility
     seed = args.seed + utils.get_rank()

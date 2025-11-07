@@ -40,11 +40,6 @@ except ImportError:
 
 
 def get_num_layer_for_convnext(var_name):
-    """
-    Divide [3, 3, 27, 3] layers into 12 groups; each group is three 
-    consecutive blocks, including possible neighboring downsample layers;
-    adapted from https://github.com/microsoft/unilm/blob/master/beit/optim_factory.py
-    """
     num_max_layer = 12
     if var_name.startswith("downsample_layers"):
         stage_id = int(var_name.split('.')[1])

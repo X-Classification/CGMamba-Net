@@ -132,7 +132,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
 
 @torch.no_grad()
-def evaluate(data_loader, model, device, use_amp=False, average='weighted'):
+def evaluate(data_loader, model, device, use_amp=False):
     criterion = torch.nn.CrossEntropyLoss()
 
     metric_logger = utils.MetricLogger(delimiter="  ")
@@ -140,9 +140,6 @@ def evaluate(data_loader, model, device, use_amp=False, average='weighted'):
 
     # switch to evaluation mode
     model.eval()
-    all_preds = []
-    all_labels = []
-
     for batch in metric_logger.log_every(data_loader, 10, header):
         images = batch[0]
         target = batch[-1]
@@ -157,37 +154,17 @@ def evaluate(data_loader, model, device, use_amp=False, average='weighted'):
                 loss = criterion(output, target)
         else:
             output = model(images)
+            # print(output.cpu().numpy())
+            # print(target.cpu().numpy())
             loss = criterion(output, target)
 
-        acc1 = accuracy(output, target, topk=(1,))
+
+        acc1 = accuracy(output, target, topk=(1, ))
 
         batch_size = images.shape[0]
         metric_logger.update(loss=loss.item())
         metric_logger.meters['acc1'].update(acc1[0].item(), n=batch_size)
-
-
-        _, preds = torch.max(output, dim=1)
-        all_preds.extend(preds.cpu().numpy())
-        all_labels.extend(target.cpu().numpy())
-
-    cm = confusion_matrix(all_labels, all_preds)
-
-    specificity_list = []
-
-    for i in range(cm.shape[0]): 
-        TN = np.sum(cm) - np.sum(cm[i, :]) - np.sum(cm[:, i]) + cm[i, i]
-        FP = np.sum(cm[:, i]) - cm[i, i]
-        specificity = TN / (TN + FP) if (TN + FP) > 0 else 0
-        specificity_list.append(specificity)
-
-    specificity_avg = np.mean(specificity_list)
-
-    precision = precision_score(all_labels, all_preds, average='macro', zero_division=0)
-    recall = recall_score(all_labels, all_preds, average='macro', zero_division=0)
-    f1 = f1_score(all_labels, all_preds, average='macro', zero_division=0)
-
-    print(f"Recall: {recall:.4f}, Precision: {precision:.4f},  Specificity: {specificity_avg:.4f}, F1 Score: {f1:.4f}")
-
+    # gather the stats from all processes
     metric_logger.synchronize_between_processes()
     print('* Acc@1 {top1.global_avg:.3f} loss {losses.global_avg:.3f}'
           .format(top1=metric_logger.acc1, losses=metric_logger.loss))
