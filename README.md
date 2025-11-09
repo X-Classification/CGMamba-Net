@@ -1,1 +1,1 @@
-# CGMamba-Net-main
+# CGMamba-Net
